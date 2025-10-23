@@ -1,7 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#define EPS 1e-6
+#define EPS 1e-9
 
 // typedef enum {
 //     STATUS_OK,
