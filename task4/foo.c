@@ -53,7 +53,12 @@ int zeckendorff(const char *string, size_t len, unsigned int *result) {
     
     size_t index = 0;
     for (index; index < len; ++index) {
-        if (string[index] == '1') res += fib[index];
+        if (string[index] == '1') {
+            if (UINT_MAX - res < fib[index]) {
+                return 3; 
+            }
+            res += fib[index];
+        }
     }
 
     *result = res;
@@ -78,11 +83,12 @@ int str_to_int_base(const char *str, int base, int *result, int upper) {
         else if (*p >= 'A' && *p <= 'Z' && upper) digit = *p++ - 'A' + 10;
         else if (*p >= 'a' && *p <= 'z' && !upper) digit = *p++ - 'a' + 10;
         else return 2;
+        if (digit >= base) return 4;
         if (val > (LLONG_MAX - (long long)digit) / (long long)base) return 3;
         val = val * (long long)base + (long long)digit;
     }
 
-    long long final_val = sign * val;
+    long long final_val = val * sign;
     
     if (final_val > INT_MAX || final_val < INT_MIN) return 3;
 
