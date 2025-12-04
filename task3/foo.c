@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <ctype.h>
 
 
 int int_to_roman(int n, char *roman) {
@@ -219,6 +220,36 @@ int oversprintf(char *str, const char *format, ...) {
             out_string += strlen(buf);
             f += 2;
         }
+        else {
+            const char *spec_start = f - 1;
+            const char *p = f;
+
+            while (*p && !isalpha(*p) && *p != '%') p++;
+            while (*p && strchr("diouxXfFeEgGaAcsSpn", *p)) {
+                p++;
+            }
+
+            char spec_buf[64];
+            size_t spec_len = p - spec_start;
+            if (spec_len >= sizeof(spec_buf)) {
+                *out_string++ = '%';
+                f++;  
+                continue;
+            }
+            memcpy(spec_buf, spec_start, spec_len);
+            spec_buf[spec_len] = '\0';
+
+
+            int n = vsprintf(out_string, spec_buf, args);
+            if (n < 0) {
+                *out_string = '\0';
+                va_end(args);
+                return -1;
+            }
+
+            out_string += n;
+            f = p;
+        }
     }
     va_end(args);
     *out_string = '\0';
@@ -323,6 +354,36 @@ int overfprintf(FILE* stream, const char* format, ... ) {
             if (len < 0) { va_end(args); return -1; }
             total_written += len;
             f += 2;
+        }
+        else {
+            const char *spec_start = f - 1;
+            const char *p = f;
+
+            while (*p && !isalpha(*p) && *p != '%') p++;
+            while (*p && strchr("diouxXfFeEgGaAcsSpn", *p)) {
+                p++;
+            }
+
+            char spec_buf[64];
+            size_t spec_len = p - spec_start;
+            if (spec_len >= sizeof(spec_buf)) {
+                fputc('%', stream);
+                total_written++;
+                f++;  
+                continue;
+            }
+            memcpy(spec_buf, spec_start, spec_len);
+            spec_buf[spec_len] = '\0';
+
+
+            int n = vfprintf(stream, spec_buf, args);
+            if (n < 0) {
+                va_end(args);
+                return -1;
+            }
+
+            total_written += n;
+            f = p;
         }
     }
     va_end(args);

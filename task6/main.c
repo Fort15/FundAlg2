@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    int choice = -1;
+    int choice = 8;
     do {
         printf("0.Выход, 1.Поиск по ID и вывод данных в трассировочный файл, 2.Поиск по имени/фамилии/группе, 3.Сортировка по ID, "
             "4.Сортировка по фамилии, 5.Сортировка по имени, 6.Сортировка по группе, " 
@@ -145,21 +145,25 @@ int main(int argc, char *argv[]) {
         }
         case 3: {
             qsort(students, count, sizeof(Student), compare_by_id);
+            printf("ID первого: %u\n", students[0].id);
             printf("Отсортировано по ID.\n");
             break;
         }
         case 4: {
             qsort(students, count, sizeof(Student), compare_by_surname);
+            printf("Фамилия первого: %s\n", students[0].surname);
             printf("Отсортировано по фамилии.\n");
             break;
         }
         case 5: {
             qsort(students, count, sizeof(Student), compare_by_name);
+            printf("Имя первого: %s\n", students[0].name);
             printf("Отсортировано по имени.\n");
             break;
         }
         case 6: {
             qsort(students, count, sizeof(Student), compare_by_group);
+            printf("Группа первого: %s\n", students[0].group);
             printf("Отсортировано по группе.\n");
             break;
         }
@@ -173,7 +177,7 @@ int main(int argc, char *argv[]) {
             break;
         }
         case 0: {
-            printf("=== Завершение программы === \n");
+            printf("\n=== Завершение программы === \n");
             break;
         }
         default: {

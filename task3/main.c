@@ -3,6 +3,15 @@
 #include <string.h>
 
 int main() {
+
+    char buf[256];
+    if (oversprintf(buf, "5 = %d 2.5 = %f, XXV = %Ro, zxc = %s", 5, 2.5, 25, "zxc")) {
+        printf("%s\n\n", buf);
+    }
+
+    overfprintf(stdout, "5 = %d 2.5 = %f, XXV = %Ro, zxc = %s\n\n", 5, 2.5, 25, "zxc");
+    
+
     printf("=== OVERSPRINTF ===\n\n");
     printf("=== TEST Ro ===\n");
     char buffer[256];

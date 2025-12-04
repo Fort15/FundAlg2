@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+int _vsscanf_one(const char *s, const char *fmt, ...);
+int vsscanf_one_arg(const char *s, const char *fmt, void *arg);
 int oversscanf(const char *str, const char *format, ...);
 int overfscanf(FILE *stream, const char *format, ...);
 

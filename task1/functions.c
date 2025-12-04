@@ -57,9 +57,9 @@ int have_infinity_presentation(int base, double number) {
     long long denominator, numerator;
     int status = find_denominator(number, EPS, &denominator, &numerator);
     if (status) return 0;
-    printf("%lld / %lld\t", numerator, denominator);
+    // printf("%lld / %lld\t", numerator, denominator);
     long long nod = gcd(numerator, denominator);
-    printf("%lld\n", nod);
+    // printf("%lld\n", nod);
     denominator /= nod;
     long long tmp = denominator;
     for (long long i = 2; i * i <= tmp; ++i) {

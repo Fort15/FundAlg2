@@ -4,6 +4,18 @@
 #include <limits.h>
 #include <ctype.h>
 
+int vsscanf_one_arg(const char *s, const char *fmt, void *arg) {
+    return _vsscanf_one(s, fmt, arg);
+}
+
+int _vsscanf_one(const char *s, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int r = vsscanf(s, fmt, ap);
+    va_end(ap);
+    return r;
+}
+
 int roman_val(char c) {
     if (c == 'I') return 1;
     if (c == 'V') return 5;
@@ -51,8 +63,7 @@ int zeckendorff(const char *string, size_t len, unsigned int *result) {
         fib[i] = fib[i - 1] + fib[i - 2];
     }
     
-    size_t index = 0;
-    for (index; index < len; ++index) {
+    for (size_t index = 0; index < len; ++index) {
         if (string[index] == '1') {
             if (UINT_MAX - res < fib[index]) {
                 return 3; 
@@ -202,7 +213,7 @@ int oversscanf(const char *str, const char *format, ...) {
 
             const char* start = s;
             while (*s && ((*s >= '0' && *s <= '9') || 
-                  (*s >= 'a' && *s <= 'z') || (*s >= 'A' && *s <= 'Z'))) {
+                  (*s >= 'a' && *s <= 'z' && !upper) || (*s >= 'A' && *s <= 'Z' && upper))) {
                     s++;
             }
 
@@ -224,8 +235,34 @@ int oversscanf(const char *str, const char *format, ...) {
 
             f += 2;
         }
-    }
+        else {
+            const char *spec_start = f - 1;
+            const char *p = f;
+            while (*p && !isspace(*p) && *p != '%') p++;
 
+            while (*s && isspace(*s)) s++;
+            const char *arg_start = s;
+            while (*s && !isspace(*s)) s++;
+
+            char spec_buf[32], arg_buf[128];
+            int spec_len = p - spec_start;
+            int arg_len = s - arg_start;
+            if (spec_len < sizeof(spec_buf) && arg_len < sizeof(arg_buf)) {
+                strncpy(spec_buf, spec_start, spec_len);
+                spec_buf[spec_len] = '\0';
+                strncpy(arg_buf, arg_start, arg_len);
+                arg_buf[arg_len] = '\0';
+
+                
+                int matched = vsscanf(arg_buf, spec_buf, args);
+                (void)va_arg(args, void*);
+
+                if (matched > 0) count += matched;
+            }
+
+            f = p;
+        }
+    }
     va_end(args);
     return count;
 }
@@ -330,8 +367,8 @@ int overfscanf(FILE *stream, const char *format, ...) {
             char buf[65];
             int i = 0;
             while (c != EOF && i < 64) {
-                if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
-                    || (c >= 'A' && c <= 'Z')) {
+                if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z' && !upper)
+                    || (c >= 'A' && c <= 'Z' && upper)) {
                     buf[i++] = (char)c;
                 } else {
                     if (c != EOF) ungetc(c, stream);
@@ -351,6 +388,27 @@ int overfscanf(FILE *stream, const char *format, ...) {
                 break;
             }
             f += 2;
+        }
+        else {
+            const char *spec_start = f - 1;
+            const char *p = f;
+
+            while (*p && !isspace(*p) && *p != '%') p++;
+
+            char spec_buf[32];
+            size_t len = p - spec_start;
+            if (len >= sizeof(spec_buf)) {
+                f++;
+                continue;
+            }
+            strncpy(spec_buf, spec_start, len);
+            spec_buf[len] = '\0';
+
+            int matched = vfscanf(stream, spec_buf, args);
+            if (matched <= 0) break;
+            count += matched;
+            (void)va_arg(args, void*);
+            f = p;
         }
     }
 

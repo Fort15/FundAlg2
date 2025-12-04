@@ -51,10 +51,13 @@ Status load_students(const char *filename, Student **students, size_t *count) {
     if (!in) return STATUS_FILE_ERROR;
 
     char line[512];
+    char prev_line[512];
     int line_count = 0;
     while (fgets(line, sizeof(line), in)) {
+        strcpy(prev_line, line);
         line_count++;
     }
+    if (strcmp(prev_line, line) != 0) line_count++;
     rewind(in);
 
     if (line_count <= 1) {
@@ -75,7 +78,7 @@ Status load_students(const char *filename, Student **students, size_t *count) {
     }
 
     int index = 0;
-    while (fgets(line, sizeof(line), in)) {
+    while (fgets(line, sizeof(line), in) || line_count) {
         unsigned int id;
         char name[128], surname[128], group[64];
         unsigned char score1, score2, score3, score4, score5;
@@ -90,6 +93,7 @@ Status load_students(const char *filename, Student **students, size_t *count) {
             fclose(in);
             return STATUS_INVALID_INPUT_FILE;
         }
+        
         array_of_students[index].id = id;
         strcpy(array_of_students[index].name, name);
         strcpy(array_of_students[index].surname, surname);
@@ -101,6 +105,7 @@ Status load_students(const char *filename, Student **students, size_t *count) {
         array_of_students[index].scores[4] = score5;
 
         index++;
+        line_count--;
     }
 
     *students = array_of_students;
